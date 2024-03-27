@@ -1,17 +1,7 @@
 "use client";
 import { useState } from "react";
-
-type ColumnType = "string" | "number" | "date";
-
-interface Column {
-  name: string;
-  type: ColumnType;
-  stringType?: string;
-  numberMin?: number;
-  numberMax?: number;
-  dateFrom?: string;
-  dateTo?: string;
-}
+import { Column, ColumnType } from "../types";
+import { generateDummyData } from "../_components/api/dummy-data";
 
 export default function DummyDataCreate() {
   const [rowCount, setRowCount] = useState(1);
@@ -77,9 +67,27 @@ export default function DummyDataCreate() {
     setColumns(newColumns);
   };
 
-  const downloadCSV = () => {
-    // CSVファイルの生成とダウンロードの処理を実装
-    // ...
+  const downloadCSV = async () => {
+    try {
+      // ダミーデータ生成APIを呼び出す
+      const res = await generateDummyData({
+        rowCount,
+        columns,
+      });
+
+      if (!res) {
+        throw new Error("ダミーデータのダウンロードURLが取得できませんでした");
+      }
+
+      const { downloadUrl } = res;
+      const link = document.createElement("a");
+      link.href = downloadUrl;
+      link.download = "dummy-data.csv";
+      link.click();
+    } catch (error) {
+      console.error("ダミーデータのダウンロードに失敗しました", error);
+      alert("ダミーデータのダウンロードに失敗しました");
+    }
   };
 
   return (
